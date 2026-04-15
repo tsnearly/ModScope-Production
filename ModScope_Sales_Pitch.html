@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ModScope — Know Your Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1117;
+    --paper: #f5f2eb;
+    --orange: #e8541a;
+    --orange-dim: #c4431200;
+    --orange-glow: rgba(232,84,26,0.12);
+    --rule: rgba(15,17,23,0.12);
+    --muted: #6b6860;
+    --card-bg: #ffffff;
+    --tag-bg: rgba(232,84,26,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* Subtle grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.35;
+  }
+
+  .wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ── Header strip ── */
+  .header-strip {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .header-strip span { opacity: 0.5; }
+  .header-strip strong { color: var(--orange); font-weight: 500; }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--rule);
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 28px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1.5px;
+    background: var(--orange);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(40px, 6vw, 62px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--orange);
+  }
+
+  .hero-sub {
+    font-size: 19px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--orange);
+    color: #fff;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 14px 26px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn-primary:hover { background: #c94415; transform: translateY(-1px); }
+  .btn-primary svg { flex-shrink: 0; }
+
+  .btn-ghost {
+    font-size: 14px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .btn-ghost:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* ── Stat bar ── */
+  .stat-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 52px 0;
+    animation: fadeUp 0.7s 0.1s ease both;
+    background: var(--card-bg);
+  }
+  .stat {
+    padding: 28px 24px;
+    border-right: 1px solid var(--rule);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: var(--orange);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Section headings ── */
+  .section {
+    padding: 60px 0;
+    border-bottom: 1px solid var(--rule);
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+    max-width: 60px;
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(26px, 3.5vw, 36px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 18px;
+    color: var(--ink);
+  }
+  h2 em { font-style: italic; color: var(--orange); }
+
+  .section-intro {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 560px;
+    margin-bottom: 40px;
+    line-height: 1.65;
+  }
+
+  /* ── Feature cards ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 560px) { .feature-grid { grid-template-columns: 1fr; } }
+
+  .feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .feature-card:hover { border-color: rgba(232,84,26,0.3); box-shadow: 0 4px 24px var(--orange-glow); }
+  .feature-card:hover::before { transform: scaleX(1); }
+
+  .feature-icon {
+    font-size: 22px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .feature-title {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Privacy block ── */
+  .privacy-block {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 8px;
+    padding: 36px 36px;
+    margin: 40px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .privacy-block::after {
+    content: '🔒';
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 48px;
+    opacity: 0.08;
+  }
+  .privacy-block h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: var(--paper);
+  }
+  .privacy-block p {
+    font-size: 14px;
+    color: rgba(245,242,235,0.65);
+    line-height: 1.65;
+    max-width: 520px;
+  }
+  .privacy-block strong { color: var(--orange); font-weight: 500; }
+
+  /* ── Theme row ── */
+  .themes-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .theme-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--card-bg);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.03em;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-chip:hover { border-color: var(--orange); color: var(--orange); }
+  .theme-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Pull quote ── */
+  .pull-quote {
+    border-left: 3px solid var(--orange);
+    padding: 20px 28px;
+    margin: 44px 0;
+    background: var(--orange-glow);
+    border-radius: 0 6px 6px 0;
+  }
+  .pull-quote p {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  /* ── How it works steps ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 36px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--orange);
+    letter-spacing: 0.1em;
+    padding-top: 3px;
+    font-weight: 500;
+  }
+  .step-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 5px;
+  }
+  .step-body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Tag list ── */
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .tag {
+    background: var(--tag-bg);
+    color: var(--orange);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 6px 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(232,84,26,0.2);
+  }
+
+  /* ── Final CTA ── */
+  .final-cta {
+    padding: 80px 0 60px;
+    text-align: center;
+    animation: fadeUp 0.6s ease both;
+  }
+  .final-cta h2 {
+    font-size: clamp(32px, 5vw, 52px);
+    margin-bottom: 18px;
+  }
+  .final-cta p {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 40px;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .final-cta .btn-primary {
+    font-size: 16px;
+    padding: 16px 32px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  footer span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  footer a:hover { color: var(--orange); border-color: var(--orange); }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.12s; }
+  .delay-3 { animation-delay: 0.2s; }
+</style>
+</head>
+<body>
+
+<div class="header-strip">
+  <span>ModScope · Community Analytics for Reddit Moderators</span>
+  <strong>Now Available on Devvit</strong>
+</div>
+
+<div class="wrapper">
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="eyebrow">For Reddit Moderators</div>
+    <h1>Stop guessing.<br><em>Start knowing.</em></h1>
+    <p class="hero-sub">
+      ModScope is a native Reddit analytics tool that shows you exactly how your community is performing — post lifecycles, engagement trends, best posting times, and more. No spreadsheets. No external dashboards. Just clarity, right inside your mod interface.
+    </p>
+    <div class="cta-row">
+      <a href="#" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v10M4 7l4 4 4-4M2 14h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Install ModScope Free
+      </a>
+      <a href="#how-it-works" class="btn-ghost">See how it works ↓</a>
+    </div>
+  </section>
+
+  <!-- ── STAT BAR ── -->
+  <div class="stat-bar">
+    <div class="stat">
+      <div class="stat-num">30</div>
+      <div class="stat-label">days of history</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">1,000</div>
+      <div class="stat-label">posts per scan</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">external servers</div>
+    </div>
+  </div>
+
+  <!-- ── PROBLEM ── -->
+  <section class="section delay-1">
+    <div class="section-label">The problem</div>
+    <h2>You moderate blind.<br><em>ModScope fixes that.</em></h2>
+    <p class="section-intro">
+      Reddit gives you a queue. It doesn't give you a picture of your community's health, what content your members actually engage with, when they're most active, or whether things are trending up or quietly declining. Until now.
+    </p>
+
+    <div class="pull-quote">
+      <p>"Most moderators are reacting to what's already happened. ModScope gives you the data to get ahead of it."</p>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ── -->
+  <section class="section delay-2">
+    <div class="section-label">What you get</div>
+    <h2>Everything your community data<br><em>is trying to tell you.</em></h2>
+    <p class="section-intro">
+      ModScope scans your subreddit on your schedule and surfaces actionable insight across every dimension of community health.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="feature-icon">📈</span>
+        <div class="feature-title">Engagement Scoring</div>
+        <div class="feature-desc">A fully configurable algorithm weighs comments, upvotes, reply depth, velocity, and OP participation. Not just upvotes — actual engagement quality.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🕐</span>
+        <div class="feature-title">Prime Posting Times</div>
+        <div class="feature-desc">Know exactly which day and hour consistently produces your highest-performing posts, calculated from real historical engagement — not guesswork.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">☁️</span>
+        <div class="feature-title">Content Word Cloud</div>
+        <div class="feature-desc">See at a glance what your community talks about most, derived from every post title across your analysis window. Your community's vocabulary, visualized.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <div class="feature-title">Trend Reports</div>
+        <div class="feature-desc">Subscriber growth, engagement over time, content type evolution, and activity heatmaps — all pre-materialized for instant load, no waiting.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚙️</span>
+        <div class="feature-title">Flexible Scheduling</div>
+        <div class="feature-desc">Daily, twice-daily, weekly, or custom cron. ModScope adapts to your community's pace, not the other way around.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎛️</span>
+        <div class="feature-title">Algorithm Presets</div>
+        <div class="feature-desc">Discussion-Heavy, Image/Meme, Gaming, Support, News — or build your own. One click to tune ModScope to your community's archetype.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRIVACY ── -->
+  <section class="section">
+    <div class="section-label">Privacy by design</div>
+    <h2>Your data stays<br><em>on Reddit.</em></h2>
+    <p class="section-intro">
+      ModScope is built entirely on Reddit's Devvit platform. There are no external servers, no third-party databases, and no data leaving Reddit's infrastructure.
+    </p>
+
+    <div class="privacy-block">
+      <h3>Zero external data collection.</h3>
+      <p>Every byte of analytics data ModScope generates is stored in <strong>Reddit's own native Redis layer</strong> — scoped to your subreddit, controlled by Reddit's infrastructure, and never touched by SeeTigerLearn servers (because there are none). No sign-up required. No API keys. No tracking.</p>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="section" id="how-it-works">
+    <div class="section-label">How it works</div>
+    <h2>Up and running in<br><em>three steps.</em></h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div>
+          <div class="step-title">Install ModScope from the Devvit app directory</div>
+          <div class="step-body">One click from the Reddit Developer Platform. No configuration required to get started — ModScope works out of the box with sensible defaults.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">Set your schedule and tune the algorithm</div>
+          <div class="step-body">Choose how often you want ModScope to scan your community. Pick a preset that matches your subreddit's content type, or dial in custom engagement weights if you want full control.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">Open your Report tab and start learning</div>
+          <div class="step-body">After your first scan completes, you have a full analytics dashboard — top posts ranked by genuine engagement, community stats, prime posting times, and a word cloud of your community's most-used language. Every scan after that adds to your historical trend data.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── THEMES ── -->
+  <section class="section">
+    <div class="section-label">Made for mod life</div>
+    <h2>Works the way<br><em>you work.</em></h2>
+    <p class="section-intro">
+      Whether you clear your queue at noon or at 2 AM, ModScope has a theme that won't strain your eyes. Each moderator on your team can set their own preference independently.
+    </p>
+    <div class="themes-row">
+      <div class="theme-chip"><span class="theme-dot" style="background:#f5f2eb; border:1px solid #ccc;"></span>Flow</div>
+      <div class="theme-chip"><span class="theme-dot" style="background:#2c2217;"></span>Clockwork</div>
+      <div class="theme-chip"><span class="theme-dot" style="background:#dff0f8;"></span>Frozen Mist</div>
+      <div class="theme-chip"><span class="theme-dot" style="background:#1a1a1a;"></span>Nocturne</div>
+      <div class="theme-chip"><span class="theme-dot" style="background:#ffa000;"></span>Amber</div>
+      <div class="theme-chip"><span class="theme-dot" style="background:#8b1a3a;"></span>Rose Meadow</div>
+      <div class="theme-chip"><span class="theme-dot" style="background:#d4f0c0;"></span>Springtime</div>
+    </div>
+
+    <div style="margin-top: 36px;">
+      <p class="section-intro" style="margin-bottom:16px;">Built for communities of all types:</p>
+      <div class="tag-list">
+        <span class="tag">Discussion</span>
+        <span class="tag">Image &amp; Meme</span>
+        <span class="tag">Gaming</span>
+        <span class="tag">Support &amp; Help</span>
+        <span class="tag">News</span>
+        <span class="tag">Trivia</span>
+        <span class="tag">Niche Hobbyist</span>
+        <span class="tag">Any subreddit</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FINAL CTA ── -->
+  <section class="final-cta">
+    <div class="eyebrow" style="justify-content:center;">Free to install</div>
+    <h2>Your community<br><em>deserves better data.</em></h2>
+    <p>ModScope is free, privacy-respecting, and takes about three minutes to set up. Your first report is one scan away.</p>
+    <a href="#" class="btn-primary" style="display:inline-flex;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v10M4 7l4 4 4-4M2 14h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Install ModScope on Reddit
+    </a>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <span>© 2026 SeeTigerLearn — ModScope</span>
+    <div style="display:flex;gap:24px;">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Support</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
